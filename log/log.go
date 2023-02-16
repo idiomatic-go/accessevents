@@ -2,7 +2,7 @@ package log
 
 import (
 	"fmt"
-	"github.com/idiomatic-go/motif/accessdata"
+	"github.com/idiomatic-go/accessevents/data"
 )
 
 const (
@@ -11,29 +11,29 @@ const (
 	errorEmptyFmt = "%v log entries are empty"
 )
 
-var ingressOperators []accessdata.Operator
-var egressOperators []accessdata.Operator
+var ingressOperators []data.Operator
+var egressOperators []data.Operator
 
 // InitIngressOperators - allows configuration of access log attributes for ingress traffic
-func InitIngressOperators(config []accessdata.Operator) error {
+func InitIngressOperators(config []data.Operator) error {
 	var err error
-	ingressOperators, err = accessdata.InitOperators(config)
+	ingressOperators, err = data.InitOperators(config)
 	return err
 }
 
 // InitEgressOperators - allows configuration of access log attributes for egress traffic
-func InitEgressOperators(config []accessdata.Operator) error {
+func InitEgressOperators(config []data.Operator) error {
 	var err error
-	egressOperators, err = accessdata.InitOperators(config)
+	egressOperators, err = data.InitOperators(config)
 	return err
 }
 
 // Log - templated function handling writing the access log entry utilizing the OutputHandler and Formatter
-func Log[O OutputHandler, F accessdata.Formatter](entry *accessdata.Entry) {
+func Log[O OutputHandler, F data.Formatter](entry *data.Entry) {
 	var o O
 	var f F
 	if entry == nil {
-		o.Write([]accessdata.Operator{{errorName, errorNilEntry}}, accessdata.NewEntry(), f)
+		o.Write([]data.Operator{{errorName, errorNilEntry}}, data.NewEntry(), f)
 		return
 	}
 	if entry.IsIngress() {
@@ -41,7 +41,7 @@ func Log[O OutputHandler, F accessdata.Formatter](entry *accessdata.Entry) {
 			return
 		}
 		if len(ingressOperators) == 0 {
-			o.Write(emptyOperators(entry), accessdata.NewEntry(), f)
+			o.Write(emptyOperators(entry), data.NewEntry(), f)
 			return
 		}
 		o.Write(ingressOperators, entry, f)
@@ -50,13 +50,13 @@ func Log[O OutputHandler, F accessdata.Formatter](entry *accessdata.Entry) {
 			return
 		}
 		if len(egressOperators) == 0 {
-			o.Write(emptyOperators(entry), accessdata.NewEntry(), f)
+			o.Write(emptyOperators(entry), data.NewEntry(), f)
 			return
 		}
 		o.Write(egressOperators, entry, f)
 	}
 }
 
-func emptyOperators(entry *accessdata.Entry) []accessdata.Operator {
-	return []accessdata.Operator{{errorName, fmt.Sprintf(errorEmptyFmt, entry.Traffic)}}
+func emptyOperators(entry *data.Entry) []data.Operator {
+	return []data.Operator{{errorName, fmt.Sprintf(errorEmptyFmt, entry.Traffic)}}
 }

@@ -1,13 +1,5 @@
 package extract
 
-import (
-	"fmt"
-	"github.com/idiomatic-go/motif/accessdata"
-	"github.com/idiomatic-go/motif/template"
-	"net/http"
-	"time"
-)
-
 /*
 func setTestErrorHandler() {
 	opt.handler = func(err error) {
@@ -17,6 +9,7 @@ func setTestErrorHandler() {
 
 */
 
+/*
 func Example_Initialize_Url() {
 	status := Initialize[template.DebugError]("", nil)
 	fmt.Printf("test: initialize(\"\") -> [%v] [url:%v]\n", status, url)
@@ -99,3 +92,6 @@ func _Example_Handler_Processed() {
 	//test: handler(logd) -> [{"start_time":"0001-01-01 00:00:00.000000","duration_ms":0,"traffic":null,"route_name":"route-data-1","region":"region-2","zone":null,"sub_zone":null,"service":null,"instance_id":null,"method":null,"host":null,"path":null,"protocol":null,"request_id":null,"forwarded":null,"status_code":"0","status_flags":null,"timeout_ms":null,"rate_limit":null,"rate_burst":null,"retry":null,"retry_rate_limit":null,"retry_rate_burst":null,"failover":null}]
 
 }
+
+
+*/

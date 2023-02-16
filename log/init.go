@@ -3,6 +3,7 @@ package log
 import (
 	"encoding/json"
 	"errors"
+	"github.com/idiomatic-go/accessevents/data"
 )
 
 // CreateEgressOperators - provides creation of egress operators from a []byte
@@ -24,8 +25,8 @@ func CreateIngressOperators(buf []byte) error {
 }
 
 // ReadOperators - read the operators from a []byte
-func ReadOperators(buf []byte) ([]accessdata.Operator, error) {
-	var operators []accessdata.Operator
+func ReadOperators(buf []byte) ([]data.Operator, error) {
+	var operators []data.Operator
 
 	if buf == nil {
 		return nil, errors.New("invalid argument: buffer is nil")
