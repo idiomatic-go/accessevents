@@ -28,8 +28,8 @@ func InitEgressOperators(config []data.Operator) error {
 	return err
 }
 
-// Log - templated function handling writing the access log entry utilizing the OutputHandler and Formatter
-func Log[O OutputHandler, F data.Formatter](entry *data.Entry) {
+// Write - templated function handling writing the access data utilizing the OutputHandler and Formatter
+func Write[O OutputHandler, F data.Formatter](entry *data.Entry) {
 	var o O
 	var f F
 	if entry == nil {

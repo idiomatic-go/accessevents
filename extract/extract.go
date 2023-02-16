@@ -3,15 +3,13 @@ package extract
 import (
 	"errors"
 	"github.com/idiomatic-go/accessevents/data"
-	//"github.com/idiomatic-go/motif/runtime"
-	//"github.com/idiomatic-go/motif/template"
-	//"github.com/idiomatic-go/resiliency/actuator"
 	"net/http"
+	urlpkg "net/url"
 	"reflect"
 	"strings"
 )
 
-type ErrorHandleFn func(location string, errs ...error)
+type ErrorHandleFn func(location string, err error)
 
 type messageHandler func(l *data.Entry) bool
 type pkg struct{}
@@ -59,16 +57,17 @@ var (
 	}
 )
 
-/*
 // Initialize - templated function to initialize extract
-func Initialize[E template.ErrorHandler](uri string, newClient *http.Client) *runtime.Status {
-	errorHandler = template.NewErrorHandleFn[E]()
+func Initialize(uri string, newClient *http.Client, errorFn ErrorHandleFn) bool {
+	errorHandler = errorFn
 	if uri == "" {
-		return errorHandler(locInit, errors.New("invalid argument: uri is empty"))
+		errorHandler(locInit, errors.New("invalid argument: uri is empty"))
+		return false
 	}
 	u, err1 := urlpkg.Parse(uri)
 	if err1 != nil {
-		return errorHandler(locInit, err1)
+		errorHandler(locInit, err1)
+		return false
 	}
 	url = u.String()
 	c = make(chan *data.Entry, 100)
@@ -76,12 +75,9 @@ func Initialize[E template.ErrorHandler](uri string, newClient *http.Client) *ru
 	if newClient != nil {
 		client = newClient
 	}
-	//actuator.EnableExtract(extract)
-	return runtime.NewStatusOK()
+	return true
 }
 
-
-*/
 func Shutdown() {
 	if c != nil {
 		close(c)

@@ -2,7 +2,7 @@ package log
 
 import (
 	"fmt"
-	"github.com/idiomatic-go/motif/accessdata"
+	"github.com/idiomatic-go/accessevents/data"
 	"net/http"
 	"reflect"
 	"time"
@@ -11,8 +11,8 @@ import (
 func ExampleLog_Error() {
 	start := time.Now()
 
-	Log[TestOutputHandler, accessdata.TextFormatter](nil)
-	Log[TestOutputHandler, accessdata.JsonFormatter](accessdata.NewHttpEgressEntry(start, time.Since(start), map[string]string{accessdata.ActName: "egress-route"}, nil, nil, ""))
+	Write[TestOutputHandler, data.TextFormatter](nil)
+	Write[TestOutputHandler, data.JsonFormatter](data.NewHttpEgressEntry(start, time.Since(start), map[string]string{data.ActName: "egress-route"}, nil, nil, ""))
 
 	//Output:
 	//test: Write() -> [access data entry is nil]
@@ -24,18 +24,18 @@ func ExampleLog_Origin() {
 	name := "ingress-origin-route"
 	start := time.Now()
 
-	accessdata.SetOrigin(accessdata.Origin{Region: "us-west", Zone: "dfw", Service: "test-service", InstanceId: "123456-7890-1234"})
-	err := InitIngressOperators([]accessdata.Operator{{Value: accessdata.StartTimeOperator}, {Value: accessdata.DurationOperator, Name: "duration_ms"},
-		{Value: accessdata.TrafficOperator}, {Value: accessdata.RouteNameOperator}, {Value: accessdata.OriginRegionOperator}, {Value: accessdata.OriginZoneOperator}, {Value: accessdata.OriginServiceOperator}, {Value: accessdata.OriginInstanceIdOperator},
+	data.SetOrigin(data.Origin{Region: "us-west", Zone: "dfw", Service: "test-service", InstanceId: "123456-7890-1234"})
+	err := InitIngressOperators([]data.Operator{{Value: data.StartTimeOperator}, {Value: data.DurationOperator, Name: "duration_ms"},
+		{Value: data.TrafficOperator}, {Value: data.RouteNameOperator}, {Value: data.OriginRegionOperator}, {Value: data.OriginZoneOperator}, {Value: data.OriginServiceOperator}, {Value: data.OriginInstanceIdOperator},
 	})
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
 	var start1 time.Time
-	data := accessdata.NewHttpIngressEntry(start1, time.Since(start), map[string]string{accessdata.ActName: name}, nil, 0, 0, "")
-	Log[TestOutputHandler, accessdata.JsonFormatter](data)
-	Log[TestOutputHandler, accessdata.TextFormatter](data)
+	entry := data.NewHttpIngressEntry(start1, time.Since(start), map[string]string{data.ActName: name}, nil, 0, 0, "")
+	Write[TestOutputHandler, data.JsonFormatter](entry)
+	Write[TestOutputHandler, data.TextFormatter](entry)
 
 	//Output:
 	//test: Write() -> [{"start_time":"0001-01-01 00:00:00.000000","duration_ms":0,"traffic":"ingress","route_name":"ingress-origin-route","region":"us-west","zone":"dfw","service":"test-service","instance_id":"123456-7890-1234"}]
@@ -48,17 +48,17 @@ func ExampleLog_Ping() {
 	url := "https://www.google.com/search"
 
 	req, _ := http.NewRequest("", url, nil)
-	accessdata.SetPingRoutes([]accessdata.PingRoute{{Traffic: "ingress", Pattern: "/search"}})
+	data.SetPingRoutes([]data.PingRoute{{Traffic: "ingress", Pattern: "/search"}})
 	start := time.Now()
-	err := InitIngressOperators([]accessdata.Operator{{Value: accessdata.StartTimeOperator}, {Value: accessdata.DurationOperator, Name: "duration_ms"},
-		{Value: accessdata.TrafficOperator}, {Value: accessdata.RouteNameOperator}})
+	err := InitIngressOperators([]data.Operator{{Value: data.StartTimeOperator}, {Value: data.DurationOperator, Name: "duration_ms"},
+		{Value: data.TrafficOperator}, {Value: data.RouteNameOperator}})
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
 	var start1 time.Time
-	data := accessdata.NewHttpIngressEntry(start1, time.Since(start), map[string]string{accessdata.ActName: name}, req, 0, 0, "")
-	Log[TestOutputHandler, accessdata.JsonFormatter](data)
+	entry := data.NewHttpIngressEntry(start1, time.Since(start), map[string]string{data.ActName: name}, req, 0, 0, "")
+	Write[TestOutputHandler, data.JsonFormatter](entry)
 
 	//Output:
 	//test: Write() -> [{"start_time":"0001-01-01 00:00:00.000000","duration_ms":0,"traffic":"ping","route_name":"ingress-ping-route"}]
@@ -68,14 +68,14 @@ func ExampleLog_Ping() {
 func ExampleLog_Timeout() {
 	start := time.Now()
 
-	err := InitEgressOperators([]accessdata.Operator{{Value: accessdata.StartTimeOperator}, {Name: "duration_ms", Value: accessdata.DurationOperator},
-		{Value: accessdata.TrafficOperator}, {Value: accessdata.RouteNameOperator}, {Value: accessdata.TimeoutDurationOperator}, {Name: "static", Value: "value"}})
+	err := InitEgressOperators([]data.Operator{{Value: data.StartTimeOperator}, {Name: "duration_ms", Value: data.DurationOperator},
+		{Value: data.TrafficOperator}, {Value: data.RouteNameOperator}, {Value: data.TimeoutDurationOperator}, {Name: "static", Value: "value"}})
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
 	var start1 time.Time
-	Log[TestOutputHandler, accessdata.JsonFormatter](accessdata.NewHttpEgressEntry(start1, time.Since(start), map[string]string{accessdata.ActName: "handler-route", accessdata.TimeoutName: "5000"}, nil, nil, ""))
+	Write[TestOutputHandler, data.JsonFormatter](data.NewHttpEgressEntry(start1, time.Since(start), map[string]string{data.ActName: "handler-route", data.TimeoutName: "5000"}, nil, nil, ""))
 
 	//Output:
 	//test: Write() -> [{"start_time":"0001-01-01 00:00:00.000000","duration_ms":0,"traffic":"egress","route_name":"handler-route","timeout_ms":5000,"static":"value"}]
@@ -85,14 +85,14 @@ func ExampleLog_Timeout() {
 func ExampleLog_RateLimiter_500() {
 	start := time.Now()
 
-	err := InitEgressOperators([]accessdata.Operator{{Value: accessdata.StartTimeOperator}, {Name: "duration", Value: accessdata.DurationOperator},
-		{Value: accessdata.TrafficOperator}, {Value: accessdata.RouteNameOperator}, {Value: accessdata.RateLimitOperator}, {Value: accessdata.RateBurstOperator}, {Name: "static2", Value: "value2"}})
+	err := InitEgressOperators([]data.Operator{{Value: data.StartTimeOperator}, {Name: "duration", Value: data.DurationOperator},
+		{Value: data.TrafficOperator}, {Value: data.RouteNameOperator}, {Value: data.RateLimitOperator}, {Value: data.RateBurstOperator}, {Name: "static2", Value: "value2"}})
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
 	var start1 time.Time
-	Log[TestOutputHandler, accessdata.JsonFormatter](accessdata.NewHttpEgressEntry(start1, time.Since(start), map[string]string{accessdata.ActName: "handler-route", accessdata.RateLimitName: "500", accessdata.RateBurstName: "10"}, nil, nil, ""))
+	Write[TestOutputHandler, data.JsonFormatter](data.NewHttpEgressEntry(start1, time.Since(start), map[string]string{data.ActName: "handler-route", data.RateLimitName: "500", data.RateBurstName: "10"}, nil, nil, ""))
 
 	//Output:
 	//test: Write() -> [{"start_time":"0001-01-01 00:00:00.000000","duration":0,"traffic":"egress","route_name":"handler-route","rate_limit":500,"rate_burst":10,"static2":"value2"}]
@@ -102,14 +102,14 @@ func ExampleLog_RateLimiter_500() {
 func ExampleLog_Failover() {
 	start := time.Now()
 
-	err := InitEgressOperators([]accessdata.Operator{{Value: accessdata.StartTimeOperator}, {Name: "duration", Value: accessdata.DurationOperator},
-		{Value: accessdata.TrafficOperator}, {Value: accessdata.RouteNameOperator}, {Value: accessdata.FailoverOperator}, {Name: "static2", Value: "value2"}})
+	err := InitEgressOperators([]data.Operator{{Value: data.StartTimeOperator}, {Name: "duration", Value: data.DurationOperator},
+		{Value: data.TrafficOperator}, {Value: data.RouteNameOperator}, {Value: data.FailoverOperator}, {Name: "static2", Value: "value2"}})
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
 	var start1 time.Time
-	Log[TestOutputHandler, accessdata.JsonFormatter](accessdata.NewHttpEgressEntry(start1, time.Since(start), map[string]string{accessdata.ActName: "handler-route", accessdata.FailoverName: "true"}, nil, nil, ""))
+	Write[TestOutputHandler, data.JsonFormatter](data.NewHttpEgressEntry(start1, time.Since(start), map[string]string{data.ActName: "handler-route", data.FailoverName: "true"}, nil, nil, ""))
 
 	//Output:
 	//test: Write() -> [{"start_time":"0001-01-01 00:00:00.000000","duration":0,"traffic":"egress","route_name":"handler-route","failover":true,"static2":"value2"}]
@@ -119,15 +119,15 @@ func ExampleLog_Failover() {
 func ExampleLog_Retry() {
 	start := time.Now()
 
-	err := InitEgressOperators([]accessdata.Operator{{Value: accessdata.StartTimeOperator}, {Value: accessdata.DurationOperator, Name: "duration_ms"},
-		{Value: accessdata.TrafficOperator}, {Value: accessdata.RouteNameOperator}, {Value: accessdata.RetryOperator},
-		{Value: accessdata.RetryRateLimitOperator}, {Value: accessdata.RetryRateBurstOperator}})
+	err := InitEgressOperators([]data.Operator{{Value: data.StartTimeOperator}, {Value: data.DurationOperator, Name: "duration_ms"},
+		{Value: data.TrafficOperator}, {Value: data.RouteNameOperator}, {Value: data.RetryOperator},
+		{Value: data.RetryRateLimitOperator}, {Value: data.RetryRateBurstOperator}})
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
 	var start1 time.Time
-	Log[TestOutputHandler, accessdata.JsonFormatter](accessdata.NewHttpEgressEntry(start1, time.Since(start), map[string]string{accessdata.ActName: "handler-route", accessdata.RetryName: "true", accessdata.RetryRateLimitName: "123", accessdata.RetryRateBurstName: "67"}, nil, nil, ""))
+	Write[TestOutputHandler, data.JsonFormatter](data.NewHttpEgressEntry(start1, time.Since(start), map[string]string{data.ActName: "handler-route", data.RetryName: "true", data.RetryRateLimitName: "123", data.RetryRateBurstName: "67"}, nil, nil, ""))
 
 	//Output:
 	//test: Write() -> [{"start_time":"0001-01-01 00:00:00.000000","duration_ms":0,"traffic":"egress","route_name":"handler-route","retry":true,"retry_rate_limit":123,"retry_rate_burst":67}]
@@ -139,14 +139,14 @@ func ExampleLog_Request() {
 	req.Header.Add("customer", "Ted's Bait & Tackle")
 
 	var start time.Time
-	err := InitEgressOperators([]accessdata.Operator{{Value: accessdata.RequestProtocolOperator}, {Value: accessdata.RequestMethodOperator}, {Value: accessdata.RequestUrlOperator},
-		{Value: accessdata.RequestPathOperator}, {Value: accessdata.RequestHostOperator}, {Value: "%REQ(customer)%"}})
+	err := InitEgressOperators([]data.Operator{{Value: data.RequestProtocolOperator}, {Value: data.RequestMethodOperator}, {Value: data.RequestUrlOperator},
+		{Value: data.RequestPathOperator}, {Value: data.RequestHostOperator}, {Value: "%REQ(customer)%"}})
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
-	Log[TestOutputHandler, accessdata.JsonFormatter](accessdata.NewHttpEgressEntry(start, time.Since(start), map[string]string{accessdata.ActName: "handler-route"}, nil, nil, ""))
-	Log[TestOutputHandler, accessdata.JsonFormatter](accessdata.NewHttpEgressEntry(start, time.Since(start), map[string]string{accessdata.ActName: "handler-route"}, req, nil, ""))
+	Write[TestOutputHandler, data.JsonFormatter](data.NewHttpEgressEntry(start, time.Since(start), map[string]string{data.ActName: "handler-route"}, nil, nil, ""))
+	Write[TestOutputHandler, data.JsonFormatter](data.NewHttpEgressEntry(start, time.Since(start), map[string]string{data.ActName: "handler-route"}, req, nil, ""))
 
 	//Output:
 	//test: Write() -> [{"protocol":null,"method":null,"url":null,"path":null,"host":null,"customer":null}]
@@ -157,14 +157,14 @@ func ExampleLog_Request() {
 func ExampleLog_Response() {
 	resp := &http.Response{StatusCode: 404, ContentLength: 1234}
 
-	err := InitEgressOperators([]accessdata.Operator{{Value: accessdata.ResponseStatusCodeOperator}, {Value: accessdata.ResponseBytesReceivedOperator}, {Value: accessdata.StatusFlagsOperator}})
+	err := InitEgressOperators([]data.Operator{{Value: data.ResponseStatusCodeOperator}, {Value: data.ResponseBytesReceivedOperator}, {Value: data.StatusFlagsOperator}})
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
 	var start time.Time
-	Log[TestOutputHandler, accessdata.JsonFormatter](accessdata.NewHttpEgressEntry(start, time.Since(start), map[string]string{accessdata.ActName: "handler-route"}, nil, nil, "UT"))
-	Log[TestOutputHandler, accessdata.JsonFormatter](accessdata.NewHttpEgressEntry(start, time.Since(start), map[string]string{accessdata.ActName: "handler-route"}, nil, resp, "UT"))
+	Write[TestOutputHandler, data.JsonFormatter](data.NewHttpEgressEntry(start, time.Since(start), map[string]string{data.ActName: "handler-route"}, nil, nil, "UT"))
+	Write[TestOutputHandler, data.JsonFormatter](data.NewHttpEgressEntry(start, time.Since(start), map[string]string{data.ActName: "handler-route"}, nil, resp, "UT"))
 
 	//Output:
 	//test: Write() -> [{"status_code":0,"bytes_received":0,"status_flags":"UT"}]
