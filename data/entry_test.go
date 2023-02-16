@@ -101,7 +101,7 @@ func Example_Value_Request_Header() {
 
 func Example_Entry() {
 	var start time.Time
-	e := NewEgressEntry(start, 0, nil, 200, "urn:postgres:query.access-log", "123-456-789", "GET", "RL")
+	e := NewEgressEntry(start, 0, 200, "urn:postgres:query.access-log", "123-456-789", "GET", "RL", nil)
 	fmt.Printf("test: String() -> {%v}\n", e)
 
 	//Output:

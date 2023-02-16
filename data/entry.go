@@ -61,25 +61,31 @@ func NewEntry() *Entry {
 	return new(Entry)
 }
 
-func newEntry(traffic string, start time.Time, duration time.Duration, actState map[string]string, req *http.Request, resp *http.Response, statusFlags string) *Entry {
+func newEntry(traffic string, start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, actuatorState map[string]string) *Entry {
 	l := new(Entry)
 	l.Traffic = traffic
 	l.Start = start
 	l.Duration = duration
 	l.Origin = &opt.origin
-	if actState == nil {
-		actState = make(map[string]string, 1)
+	if actuatorState == nil {
+		actuatorState = make(map[string]string, 1)
 	}
-	l.ActState = actState
+	l.ActState = actuatorState
 	l.AddRequest(req)
 	l.AddResponse(resp)
 	l.StatusFlags = statusFlags
 	return l
 }
 
+// NewHttpEntry - create an Entry from Http traffic
+func NewHttpEntry(traffic string, start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, actuatorState map[string]string) *Entry {
+	e := newEntry(traffic, start, duration, req, resp, statusFlags, actuatorState)
+	return e
+}
+
 // NewHttpIngressEntry - create an Entry from Http ingress traffic
 func NewHttpIngressEntry(start time.Time, duration time.Duration, actState map[string]string, req *http.Request, statusCode int, written int64, statusFlags string) *Entry {
-	e := newEntry(IngressTraffic, start, duration, actState, req, nil, statusFlags)
+	e := newEntry(IngressTraffic, start, duration, req, nil, statusFlags, actState)
 	e.StatusCode = statusCode
 	e.BytesSent = written
 	return e
@@ -87,12 +93,12 @@ func NewHttpIngressEntry(start time.Time, duration time.Duration, actState map[s
 
 // NewHttpEgressEntry - create an Entry from Http egress traffic
 func NewHttpEgressEntry(start time.Time, duration time.Duration, actState map[string]string, req *http.Request, resp *http.Response, statusFlags string) *Entry {
-	return newEntry(EgressTraffic, start, duration, actState, req, resp, statusFlags)
+	return newEntry(EgressTraffic, start, duration, req, resp, statusFlags, actState)
 }
 
 // NewEgressEntry - create an Entry from non-http egress traffic
-func NewEgressEntry(start time.Time, duration time.Duration, actState map[string]string, statusCode int, uri, requestId, method, statusFlags string) *Entry {
-	e := newEntry(EgressTraffic, start, duration, actState, nil, nil, statusFlags)
+func NewEgressEntry(start time.Time, duration time.Duration, statusCode int, uri, requestId, method, statusFlags string, actuatorState map[string]string) *Entry {
+	e := newEntry(EgressTraffic, start, duration, nil, nil, statusFlags, actuatorState)
 	e.StatusCode = statusCode
 	e.AddUrl(uri)
 	e.RequestId = requestId
