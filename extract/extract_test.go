@@ -78,10 +78,10 @@ func _Example_Handler_Processed() {
 	data1 := data.Entry{Origin: &data.Origin{Region: "region-2"}, ActState: map[string]string{data.ActName: "route-data-1"}}
 	data2 := data.Entry{Origin: &data.Origin{Region: "region-3"}, ActState: map[string]string{data.ActName: "route-data-2"}}
 	data3 := data.Entry{Origin: &data.Origin{Region: "region-4"}, ActState: map[string]string{data.ActName: "route-data-3"}}
-	extract(&data0)
-	extract(&data1)
-	extract(&data2)
-	extract(&data3)
+	Extract(&data0)
+	Extract(&data1)
+	Extract(&data2)
+	Extract(&data3)
 	time.Sleep(time.Second * 2)
 	Shutdown()
 

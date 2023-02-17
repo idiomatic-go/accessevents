@@ -84,7 +84,7 @@ func Shutdown() {
 	}
 }
 
-func extract(entry *data.Entry) {
+func Extract(entry *data.Entry) {
 	if entry != nil {
 		c <- entry
 	}
