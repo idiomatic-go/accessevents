@@ -37,8 +37,8 @@ func Write[O OutputHandler, F accessdata.Formatter](entry *accessdata.Entry) {
 
 ## middleware
 
-[Middleware][middlewarepkg] provides functionality to invoke logging on ingress and egress traffic. An http.Handler implements ingress logging, while an
-http.RoundTrip interface logs egress.
+[Middleware][middlewarepkg] provides implementations of a http.Handler and http.RoundTripper that support ingress and egress logging. Options
+available allow configuring a logging function.
 
 
 [datapkg]: <https://pkg.go.dev/github.com/idiomatic-go/accessevents/data>
