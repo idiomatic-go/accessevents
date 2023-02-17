@@ -3,7 +3,6 @@ package middleware
 import (
 	"errors"
 	"github.com/idiomatic-go/accessevents/data"
-	"github.com/idiomatic-go/accessevents/log"
 	"net/http"
 	"time"
 )
@@ -25,7 +24,7 @@ func (w *wrapper) RoundTrip(req *http.Request) (*http.Response, error) {
 		return resp, err
 	}
 	entry := data.NewHttpEntry(data.EgressTraffic, start, time.Since(start), req, resp, "", nil)
-	log.Write[log.LogOutputHandler, data.JsonFormatter](entry)
+	defaultLogFn(entry)
 	return resp, nil
 }
 

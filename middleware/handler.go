@@ -3,7 +3,6 @@ package middleware
 import (
 	"github.com/felixge/httpsnoop"
 	"github.com/idiomatic-go/accessevents/data"
-	"github.com/idiomatic-go/accessevents/log"
 	"net/http"
 	"time"
 )
@@ -19,7 +18,7 @@ func HttpHostMetricsHandler(appHandler http.Handler, msg string) http.Handler {
 		resp.StatusCode = m.Code
 		resp.ContentLength = m.Written
 		entry := data.NewHttpEntry(data.IngressTraffic, start, time.Since(start), req, resp, "", nil)
-		log.Write[log.LogOutputHandler, data.JsonFormatter](entry)
+		defaultLogFn(entry)
 	})
 	return wrappedH
 }
