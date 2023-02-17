@@ -1,11 +1,6 @@
 # accessevents
 
-Motif was inspired by the challenges of developing Go applications. Determining the patterns, or motifs, that need to be employed, is critical for writing clear idiomatic Go code. This YouTube video [Edward Muller - Go Anti-Patterns][emuller], does an excellent job of framing idiomatic go. 
-[Robert Griesemer - The Evolution of Go][rgriesemer] also presents an important analogy between Go packages and LEGO® bricks. Reviewing the Go standard
-library packaging structure provides a blueprint for an application architecture, and underscores how essential package design is for idiomatic Go. 
-
-With the release of Go generics, a new paradigm has emerged: [templates][tutorialspoint]. Templates are not new, having been available in  C++ since 1991, and have become a standard through the work of teams like [boost][boost]. I prefer the term templates over generics, as templates are a paradigm, and generics connotes a class of implementations. What follows is a description of the packages in Motif, highlighting specific patterns and template implementations.  
-
+Accessevents provides 4 packages that work with access events, access logging, and access event extract.
 
 ## data 
 
@@ -33,19 +28,20 @@ type OutputHandler interface {
 	Write(items []accessdata.Operator, data *accessdata.Entry, formatter accessdata.Formatter)
 }
 ~~~
-The log function is a templated function, allowing for selection of output and formatting:
+The log.Write function is a templated function, allowing for selection of output and formatting:
 ~~~
-func Log[O OutputHandler, F accessdata.Formatter](entry *accessdata.Entry) {
+func Write[O OutputHandler, F accessdata.Formatter](entry *accessdata.Entry) {
     // implementation details
 }
 ~~~
 
 ## middleware
 
-[Middleware][middlewarepkg] provides functionality to invoke logging on ingress and egress traffic.
+[Middleware][middlewarepkg] provides functionality to invoke logging on ingress and egress traffic. An http.Handler implements ingress logging, while an
+http.RoundTrip interface logs egress.
 
 
-[datapkg]: <https://pkg.go.dev/github.com/idiomatic-go/motif/accessdata>
-[extractpkg]: <https://pkg.go.dev/github.com/idiomatic-go/motif/accesslog>
-[logpkg]: <https://pkg.go.dev/github.com/idiomatic-go/motif/accesslog>
-[middlewarepkg]: <https://pkg.go.dev/github.com/idiomatic-go/motif/accesslog>
+[datapkg]: <https://pkg.go.dev/github.com/idiomatic-go/accessevents/data>
+[extractpkg]: <https://pkg.go.dev/github.com/idiomatic-go/accessevents/extract>
+[logpkg]: <https://pkg.go.dev/github.com/idiomatic-go/accessevents/log>
+[middlewarepkg]: <https://pkg.go.dev/github.com/idiomatic-go/accessevents/middleware>
