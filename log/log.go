@@ -14,20 +14,6 @@ const (
 var ingressOperators []data.Operator
 var egressOperators []data.Operator
 
-// InitIngressOperators - allows configuration of access log attributes for ingress traffic
-func InitIngressOperators(config []data.Operator) error {
-	var err error
-	ingressOperators, err = data.InitOperators(config)
-	return err
-}
-
-// InitEgressOperators - allows configuration of access log attributes for egress traffic
-func InitEgressOperators(config []data.Operator) error {
-	var err error
-	egressOperators, err = data.InitOperators(config)
-	return err
-}
-
 // Write - templated function handling writing the access data utilizing the OutputHandler and Formatter
 func Write[O OutputHandler, F data.Formatter](entry *data.Entry) {
 	var o O
