@@ -74,6 +74,9 @@ func newEntry(traffic string, start time.Time, duration time.Duration, req *http
 	l.AddRequest(req)
 	l.AddResponse(resp)
 	l.StatusFlags = statusFlags
+	if IsPingRoute(l.Traffic, l.Path) {
+		l.Traffic = PingTraffic
+	}
 	return l
 }
 
@@ -98,6 +101,9 @@ func NewEgressEntry(start time.Time, duration time.Duration, statusCode int, uri
 	e := newEntry(EgressTraffic, start, duration, nil, nil, statusFlags, actuatorState)
 	e.StatusCode = statusCode
 	e.AddUrl(uri)
+	if IsPingRoute(e.Traffic, e.Path) {
+		e.Traffic = PingTraffic
+	}
 	e.RequestId = requestId
 	e.Method = method
 	return e
@@ -112,7 +118,7 @@ func (l *Entry) IsEgress() bool {
 }
 
 func (l *Entry) IsPing() bool {
-	return IsPingRoute(l.Traffic, l.Path)
+	return l.Traffic == PingTraffic
 }
 
 func (l *Entry) AddResponse(resp *http.Response) {
@@ -173,9 +179,6 @@ func (l *Entry) AddRequest(req *http.Request) {
 func (l *Entry) Value(value string) string {
 	switch value {
 	case TrafficOperator:
-		if l.IsPing() {
-			return PingTraffic
-		}
 		return l.Traffic
 	case StartTimeOperator:
 		return FmtTimestamp(l.Start)

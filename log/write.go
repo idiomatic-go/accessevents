@@ -22,25 +22,26 @@ func Write[O OutputHandler, F data.Formatter](entry *data.Entry) {
 		o.Write([]data.Operator{{errorName, errorNilEntry}}, data.NewEntry(), f)
 		return
 	}
-	if entry.IsIngress() {
-		if !opt.ingress {
+	var operators []data.Operator
+	switch entry.Traffic {
+	case data.IngressTraffic, data.PingTraffic:
+		if entry.Traffic == data.IngressTraffic && !opt.ingress {
 			return
 		}
-		if len(ingressOperators) == 0 {
-			o.Write(emptyOperators(entry), data.NewEntry(), f)
+		if entry.Traffic == data.PingTraffic && !opt.ping {
 			return
 		}
-		o.Write(ingressOperators, entry, f)
-	} else {
+		operators = ingressOperators
+	case data.EgressTraffic:
 		if !opt.egress {
 			return
 		}
-		if len(egressOperators) == 0 {
-			o.Write(emptyOperators(entry), data.NewEntry(), f)
-			return
-		}
-		o.Write(egressOperators, entry, f)
+		operators = egressOperators
 	}
+	if len(operators) == 0 {
+		operators = emptyOperators(entry)
+	}
+	o.Write(operators, entry, f)
 }
 
 func emptyOperators(entry *data.Entry) []data.Operator {
