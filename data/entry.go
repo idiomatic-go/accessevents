@@ -20,7 +20,7 @@ const (
 	RetryRateBurstName = "retryBurst"
 	RateLimitName      = "rateLimit"
 	RateBurstName      = "burst"
-	ActName            = "name"
+	ControllerName     = "name"
 )
 
 // Origin - attributes that uniquely identify a service instance
@@ -34,11 +34,11 @@ type Origin struct {
 
 // Entry - struct for all access logging data
 type Entry struct {
-	Traffic  string
-	Start    time.Time
-	Duration time.Duration
-	Origin   *Origin
-	ActState map[string]string
+	Traffic   string
+	Start     time.Time
+	Duration  time.Duration
+	Origin    *Origin
+	CtrlState map[string]string
 
 	// Request
 	Url       string
@@ -61,52 +61,44 @@ func NewEntry() *Entry {
 	return new(Entry)
 }
 
-func newEntry(traffic string, start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, actuatorState map[string]string) *Entry {
-	l := new(Entry)
-	l.Traffic = traffic
-	l.Start = start
-	l.Duration = duration
-	l.Origin = &opt.origin
-	if actuatorState == nil {
-		actuatorState = make(map[string]string, 1)
+func newEntry(traffic string, start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, controllerState map[string]string) *Entry {
+	e := new(Entry)
+	e.Traffic = traffic
+	e.Start = start
+	e.Duration = duration
+	e.Origin = &opt.origin
+	if controllerState == nil {
+		controllerState = make(map[string]string, 1)
 	}
-	l.ActState = actuatorState
-	l.AddRequest(req)
-	l.AddResponse(resp)
-	l.StatusFlags = statusFlags
-	if IsPingRoute(l.Traffic, l.Path) {
-		l.Traffic = PingTraffic
+	e.CtrlState = controllerState
+	e.AddRequest(req)
+	e.AddResponse(resp)
+	e.StatusFlags = statusFlags
+	if IsPingRoute(e.Traffic, e.Path) {
+		e.Traffic = PingTraffic
 	}
-	return l
+	return e
 }
 
 // NewHttpEntry - create an Entry from Http traffic
-func NewHttpEntry(traffic string, start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, actuatorState map[string]string) *Entry {
-	e := newEntry(traffic, start, duration, req, resp, statusFlags, actuatorState)
+func NewHttpEntry(traffic string, start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, controllerState map[string]string) *Entry {
+	e := newEntry(traffic, start, duration, req, resp, statusFlags, controllerState)
 	return e
 }
 
 // NewHttpIngressEntry - create an Entry from Http ingress traffic
-func NewHttpIngressEntry(start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, actuatorState map[string]string) *Entry {
-	return NewHttpEntry(IngressTraffic, start, duration, req, resp, statusFlags, actuatorState)
+func NewHttpIngressEntry(start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, controllerState map[string]string) *Entry {
+	return NewHttpEntry(IngressTraffic, start, duration, req, resp, statusFlags, controllerState)
 }
 
 // NewHttpEgressEntry - create an Entry from Http egress traffic
-func NewHttpEgressEntry(start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, actuatorState map[string]string) *Entry {
-	return NewHttpEntry(EgressTraffic, start, duration, req, resp, statusFlags, actuatorState)
+func NewHttpEgressEntry(start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, controllerState map[string]string) *Entry {
+	return NewHttpEntry(EgressTraffic, start, duration, req, resp, statusFlags, controllerState)
 }
 
 // NewEgressEntry - create an Entry from non-http egress traffic
-func NewEgressEntry(start time.Time, duration time.Duration, statusCode int, uri, requestId, method, statusFlags string, actuatorState map[string]string) *Entry {
-	e := newEntry(EgressTraffic, start, duration, nil, nil, statusFlags, actuatorState)
-	e.StatusCode = statusCode
-	e.AddUrl(uri)
-	if IsPingRoute(e.Traffic, e.Path) {
-		e.Traffic = PingTraffic
-	}
-	e.RequestId = requestId
-	e.Method = method
-	return e
+func NewEgressEntry(start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, controllerState map[string]string) *Entry {
+	return newEntry(EgressTraffic, start, duration, req, resp, statusFlags, controllerState)
 }
 
 func (l *Entry) IsIngress() bool {
@@ -165,7 +157,12 @@ func (l *Entry) AddRequest(req *http.Request) {
 	if req.Header != nil {
 		l.Header = req.Header.Clone()
 	}
-	if req.URL != nil {
+	if req.URL == nil {
+		return
+	}
+	if req.URL.Scheme == "urn" {
+		l.AddUrl(req.URL.String())
+	} else {
 		l.Url = req.URL.String()
 		l.Path = req.URL.Path
 		if req.Host == "" {
@@ -199,10 +196,10 @@ func (l *Entry) Value(value string) string {
 			return l.Origin.Zone
 		}
 		//return opt.origin.Zone
-	//case OriginSubZoneOperator:
-	//	if l.Origin != nil {
-	//		return l.Origin.SubZone
-	//	}
+	case OriginSubZoneOperator:
+		if l.Origin != nil {
+			return l.Origin.SubZone
+		}
 	//return opt.origin.SubZone
 	case OriginServiceOperator:
 		if l.Origin != nil {
@@ -238,7 +235,7 @@ func (l *Entry) Value(value string) string {
 	case RequestAuthorityOperator:
 		return ""
 	case RequestForwardedForOperator:
-		return l.Header.Get(FordwardedForHeaderName)
+		return l.Header.Get(ForwardedForHeaderName)
 
 		// Response
 	case StatusFlagsOperator:
@@ -252,21 +249,21 @@ func (l *Entry) Value(value string) string {
 
 	// Actuator State
 	case RouteNameOperator:
-		return l.ActState[ActName]
+		return l.CtrlState[ControllerName]
 	case TimeoutDurationOperator:
-		return l.ActState[TimeoutName]
+		return l.CtrlState[TimeoutName]
 	case RateLimitOperator:
-		return l.ActState[RateLimitName]
+		return l.CtrlState[RateLimitName]
 	case RateBurstOperator:
-		return l.ActState[RateBurstName]
+		return l.CtrlState[RateBurstName]
 	case FailoverOperator:
-		return l.ActState[FailoverName]
+		return l.CtrlState[FailoverName]
 	case RetryOperator:
-		return l.ActState[RetryName]
+		return l.CtrlState[RetryName]
 	case RetryRateLimitOperator:
-		return l.ActState[RetryRateLimitName]
+		return l.CtrlState[RetryRateLimitName]
 	case RetryRateBurstOperator:
-		return l.ActState[RetryRateBurstName]
+		return l.CtrlState[RetryRateBurstName]
 	}
 	if strings.HasPrefix(value, RequestReferencePrefix) {
 		name := requestOperatorHeaderName(value)
@@ -286,6 +283,7 @@ func (l *Entry) String() string {
 			"route:%v, "+
 			"request-id:%v, "+
 			"status-code:%v, "+
+			"protocol:%v, "+
 			"method:%v, "+
 			"url:%v, "+
 			"host:%v, "+
@@ -304,6 +302,7 @@ func (l *Entry) String() string {
 
 		l.Value(RequestIdOperator),
 		l.Value(ResponseStatusCodeOperator),
+		l.Value(RequestProtocolOperator),
 		l.Value(RequestMethodOperator),
 		l.Value(RequestUrlOperator),
 		l.Value(RequestHostOperator),

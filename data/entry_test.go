@@ -38,10 +38,10 @@ func Example_Value_Actuator() {
 	data := Entry{}
 	fmt.Printf("test: Value(\"%v\") -> [%v]\n", name, data.Value(op))
 
-	data = Entry{ActState: map[string]string{ActName: name}}
+	data = Entry{CtrlState: map[string]string{ControllerName: name}}
 	fmt.Printf("test: Value(\"%v\") -> [route_name:%v]\n", name, data.Value(op))
 
-	data = Entry{ActState: map[string]string{TimeoutName: "500"}}
+	data = Entry{CtrlState: map[string]string{TimeoutName: "500"}}
 	fmt.Printf("test: Value(\"%v\") -> [timeout:%v]\n", name, data.Value(TimeoutDurationOperator))
 
 	//Output:
@@ -99,12 +99,21 @@ func Example_Value_Request_Header() {
 	//test: Value("customer") -> [Ted's Bait & Tackle]
 }
 
-func Example_Entry() {
+func Example_EgressEntry() {
 	var start time.Time
-	e := NewEgressEntry(start, 0, 200, "urn:postgres:query.access-log", "123-456-789", "GET", "RL", nil)
+
+	url := "urn:postgres:query.access-log"
+	requestId := "123-456-789"
+	req, _ := http.NewRequest("QUERY", url, nil)
+	req.Header.Add(RequestIdHeaderName, requestId)
+
+	resp := new(http.Response)
+	resp.StatusCode = 201
+
+	e := NewEgressEntry(start, 0, req, resp, "RL", nil)
 	fmt.Printf("test: String() -> {%v}\n", e)
 
 	//Output:
-	//test: String() -> {traffic:egress, route:, request-id:123-456-789, status-code:200, method:GET, url:urn:postgres:query.access-log, host:postgres, path:query.access-log, timeout:, rate-limit:, rate-burst:, retry:, retry-rate-limit:, retry-rate-burst:, status-flags:RL}
+	//test: String() -> {traffic:egress, route:, request-id:123-456-789, status-code:201, protocol:urn, method:QUERY, url:urn:postgres:query.access-log, host:postgres, path:query.access-log, timeout:, rate-limit:, rate-burst:, retry:, retry-rate-limit:, retry-rate-burst:, status-flags:RL}
 
 }

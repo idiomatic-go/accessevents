@@ -10,10 +10,10 @@ const (
 	OperatorPrefix         = "%"
 	RequestReferencePrefix = "%REQ("
 
-	RequestIdHeaderName     = "X-REQUEST-ID"
-	FromRouteHeaderName     = "FROM-ROUTE"
-	UserAgentHeaderName     = "USER-AGENT"
-	FordwardedForHeaderName = "X-FORWARDED-FOR"
+	RequestIdHeaderName    = "X-REQUEST-ID"
+	FromRouteHeaderName    = "FROM-ROUTE"
+	UserAgentHeaderName    = "USER-AGENT"
+	ForwardedForHeaderName = "X-FORWARDED-FOR"
 
 	TrafficOperator        = "%TRAFFIC%"      //  ingress, handler, ping
 	StartTimeOperator      = "%START_TIME%"   // start time
