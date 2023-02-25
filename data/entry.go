@@ -24,7 +24,7 @@ const (
 )
 
 // Origin - attributes that uniquely identify a service instance
-type Origin struct {
+type origin struct {
 	Region     string
 	Zone       string
 	SubZone    string
@@ -37,7 +37,7 @@ type Entry struct {
 	Traffic   string
 	Start     time.Time
 	Duration  time.Duration
-	Origin    *Origin
+	Origin    *origin
 	CtrlState map[string]string
 
 	// Request
@@ -56,17 +56,17 @@ type Entry struct {
 	StatusFlags   string
 }
 
-// NewEntry - create a new Entry
-func NewEntry() *Entry {
+// NewEmptyEntry - create a new empty Entry
+func NewEmptyEntry() *Entry {
 	return new(Entry)
 }
 
-func newEntry(traffic string, start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, controllerState map[string]string) *Entry {
+func NewEntry(traffic string, start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, controllerState map[string]string) *Entry {
 	e := new(Entry)
 	e.Traffic = traffic
 	e.Start = start
 	e.Duration = duration
-	e.Origin = &opt.origin
+	//e.Origin = &opt.origin
 	if controllerState == nil {
 		controllerState = make(map[string]string, 1)
 	}
@@ -74,43 +74,17 @@ func newEntry(traffic string, start time.Time, duration time.Duration, req *http
 	e.AddRequest(req)
 	e.AddResponse(resp)
 	e.StatusFlags = statusFlags
-	if IsPingRoute(e.Traffic, e.Path) {
-		e.Traffic = PingTraffic
-	}
 	return e
 }
 
-// NewHttpEntry - create an Entry from Http traffic
-func NewHttpEntry(traffic string, start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, controllerState map[string]string) *Entry {
-	e := newEntry(traffic, start, duration, req, resp, statusFlags, controllerState)
-	return e
-}
-
-// NewHttpIngressEntry - create an Entry from Http ingress traffic
-func NewHttpIngressEntry(start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, controllerState map[string]string) *Entry {
-	return NewHttpEntry(IngressTraffic, start, duration, req, resp, statusFlags, controllerState)
-}
-
-// NewHttpEgressEntry - create an Entry from Http egress traffic
-func NewHttpEgressEntry(start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, controllerState map[string]string) *Entry {
-	return NewHttpEntry(EgressTraffic, start, duration, req, resp, statusFlags, controllerState)
-}
-
-// NewEgressEntry - create an Entry from non-http egress traffic
+// NewEgressEntry - create an Entry for egress traffic
 func NewEgressEntry(start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, controllerState map[string]string) *Entry {
-	return newEntry(EgressTraffic, start, duration, req, resp, statusFlags, controllerState)
+	return NewEntry(EgressTraffic, start, duration, req, resp, statusFlags, controllerState)
 }
 
-func (l *Entry) IsIngress() bool {
-	return l.Traffic == IngressTraffic
-}
-
-func (l *Entry) IsEgress() bool {
-	return l.Traffic == EgressTraffic
-}
-
-func (l *Entry) IsPing() bool {
-	return l.Traffic == PingTraffic
+// NewIngressEntry - create an Entry for ingress traffic
+func NewIngressEntry(start time.Time, duration time.Duration, req *http.Request, resp *http.Response, statusFlags string, controllerState map[string]string) *Entry {
+	return NewEntry(IngressTraffic, start, duration, req, resp, statusFlags, controllerState)
 }
 
 func (l *Entry) AddResponse(resp *http.Response) {
@@ -247,7 +221,7 @@ func (l *Entry) Value(value string) string {
 	case ResponseStatusCodeOperator:
 		return strconv.Itoa(l.StatusCode)
 
-	// Actuator State
+	// Controller State
 	case RouteNameOperator:
 		return l.CtrlState[ControllerName]
 	case TimeoutDurationOperator:
@@ -272,7 +246,6 @@ func (l *Entry) Value(value string) string {
 	if !strings.HasPrefix(value, OperatorPrefix) {
 		return value
 	}
-
 	return ""
 }
 

@@ -23,7 +23,7 @@ func (w *wrapper) RoundTrip(req *http.Request) (*http.Response, error) {
 	if err != nil {
 		return resp, err
 	}
-	entry := data.NewHttpEntry(data.EgressTraffic, start, time.Since(start), req, resp, "", nil)
+	entry := data.NewEgressEntry(start, time.Since(start), req, resp, "", nil)
 	defaultLogFn(entry)
 	return resp, nil
 }

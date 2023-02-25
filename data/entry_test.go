@@ -8,8 +8,7 @@ import (
 
 func Example_Value_Origin() {
 	op := OriginRegionOperator
-	SetOrigin(Origin{"region", "zone", "", "", ""})
-	data := Entry{Origin: &opt.origin}
+	data := Entry{Origin: &origin{"region", "zone", "", "", ""}}
 	fmt.Printf("test: Value(\"region\") -> [%v]\n", data.Value(op))
 
 	//Output:

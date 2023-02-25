@@ -17,7 +17,7 @@ func HttpHostMetricsHandler(appHandler http.Handler, msg string) http.Handler {
 		resp := new(http.Response)
 		resp.StatusCode = m.Code
 		resp.ContentLength = m.Written
-		entry := data.NewHttpEntry(data.IngressTraffic, start, time.Since(start), req, resp, "", nil)
+		entry := data.NewIngressEntry(start, time.Since(start), req, resp, "", nil)
 		defaultLogFn(entry)
 	})
 	return wrappedH
