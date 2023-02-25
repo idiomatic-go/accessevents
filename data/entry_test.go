@@ -6,15 +6,6 @@ import (
 	"time"
 )
 
-func Example_Value_Origin() {
-	op := OriginRegionOperator
-	data := Entry{Origin: &origin{"region", "zone", "", "", ""}}
-	fmt.Printf("test: Value(\"region\") -> [%v]\n", data.Value(op))
-
-	//Output:
-	//test: Value("region") -> [region]
-}
-
 func _Example_Value_Duration() {
 	start := time.Now()
 

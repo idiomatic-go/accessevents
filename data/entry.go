@@ -23,21 +23,12 @@ const (
 	ControllerName     = "name"
 )
 
-// Origin - attributes that uniquely identify a service instance
-type origin struct {
-	Region     string
-	Zone       string
-	SubZone    string
-	Service    string
-	InstanceId string
-}
-
 // Entry - struct for all access logging data
 type Entry struct {
-	Traffic   string
-	Start     time.Time
-	Duration  time.Duration
-	Origin    *origin
+	Traffic  string
+	Start    time.Time
+	Duration time.Duration
+	//Origin    *origin
 	CtrlState map[string]string
 
 	// Request
@@ -56,7 +47,6 @@ type Entry struct {
 	StatusFlags   string
 }
 
-// NewEmptyEntry - create a new empty Entry
 func NewEmptyEntry() *Entry {
 	return new(Entry)
 }
@@ -160,32 +150,35 @@ func (l *Entry) Value(value string) string {
 		return l.Duration.String()
 
 		// Origin
-	case OriginRegionOperator:
-		if l.Origin != nil {
-			return l.Origin.Region
-		}
-		//return opt.origin.Region
-	case OriginZoneOperator:
-		if l.Origin != nil {
-			return l.Origin.Zone
-		}
-		//return opt.origin.Zone
-	case OriginSubZoneOperator:
-		if l.Origin != nil {
-			return l.Origin.SubZone
-		}
-	//return opt.origin.SubZone
-	case OriginServiceOperator:
-		if l.Origin != nil {
-			return l.Origin.Service
-		}
-		//return opt.origin.Service
-	case OriginInstanceIdOperator:
-		if l.Origin != nil {
-			return l.Origin.InstanceId
-		}
-		//return opt.origin.InstanceId
+		/*
+			case OriginRegionOperator:
+				if l.Origin != nil {
+					return l.Origin.Region
+				}
+				//return opt.origin.Region
+			case OriginZoneOperator:
+				if l.Origin != nil {
+					return l.Origin.Zone
+				}
+				//return opt.origin.Zone
+			case OriginSubZoneOperator:
+				if l.Origin != nil {
+					return l.Origin.SubZone
+				}
+			//return opt.origin.SubZone
+			case OriginServiceOperator:
+				if l.Origin != nil {
+					return l.Origin.Service
+				}
+				//return opt.origin.Service
+			case OriginInstanceIdOperator:
+				if l.Origin != nil {
+					return l.Origin.InstanceId
+				}
+				//return opt.origin.InstanceId
 
+
+		*/
 		// Request
 	case RequestMethodOperator:
 		return l.Method

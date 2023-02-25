@@ -19,7 +19,7 @@ func Write[O OutputHandler, F data.Formatter](entry *data.Entry) {
 	var o O
 	var f F
 	if entry == nil {
-		o.Write([]data.Operator{{errorName, errorNilEntry}}, data.NewEntry(), f)
+		o.Write([]data.Operator{{errorName, errorNilEntry}}, data.NewEmptyEntry(), f)
 		return
 	}
 	var operators []data.Operator

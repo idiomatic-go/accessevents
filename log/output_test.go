@@ -11,16 +11,16 @@ func ExampleOutputHandler() {
 
 	fmt.Printf("test: Output[DebugOutputHandler,data.JsonFormatter](operators,data)\n")
 	ops := []data.Operator{{"error", "message"}}
-	logTest[DebugOutputHandler, data.JsonFormatter](ops, data.NewEntry())
+	logTest[DebugOutputHandler, data.JsonFormatter](ops, data.NewEmptyEntry())
 
 	fmt.Printf("test: Output[TestOutputHandler,data.JsonFormatter](nil,nil)\n")
 	logTest[TestOutputHandler, data.JsonFormatter](nil, nil)
 
 	fmt.Printf("test: Output[TestOutputHandler,data.JsonFormatter](ops,data)\n")
-	logTest[TestOutputHandler, data.JsonFormatter](ops, data.NewEntry())
+	logTest[TestOutputHandler, data.JsonFormatter](ops, data.NewEmptyEntry())
 
 	fmt.Printf("test: Output[LogOutputHandler,data.JsonFormatter](ops,data)\n")
-	logTest[LogOutputHandler, data.JsonFormatter](ops, data.NewEntry())
+	logTest[LogOutputHandler, data.JsonFormatter](ops, data.NewEmptyEntry())
 
 	//Output:
 	//test: Output[NilOutputHandler,data.TextFormatter](nil,nil)
