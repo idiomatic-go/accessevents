@@ -25,22 +25,23 @@ const (
 	ControllerName     = "name"
 )
 
+// Accessor - function type
+type Accessor func(entry *Entry)
+
 // Entry - struct for all access logging data
 type Entry struct {
-	Traffic  string
-	Start    time.Time
-	Duration time.Duration
-	//Origin    *origin
+	Traffic   string
+	Start     time.Time
+	Duration  time.Duration
 	CtrlState map[string]string
 
 	// Request
-	Url       string
-	Path      string
-	Host      string
-	Protocol  string
-	Method    string
-	Header    http.Header
-	RequestId string
+	Url      string
+	Path     string
+	Host     string
+	Protocol string
+	Method   string
+	Header   http.Header
 
 	// Response
 	StatusCode    int
@@ -155,35 +156,9 @@ func (l *Entry) Value(value string) string {
 		return l.Duration.String()
 
 		// Origin
-		/*
-			case OriginRegionOperator:
-				if l.Origin != nil {
-					return l.Origin.Region
-				}
-				//return opt.origin.Region
-			case OriginZoneOperator:
-				if l.Origin != nil {
-					return l.Origin.Zone
-				}
-				//return opt.origin.Zone
-			case OriginSubZoneOperator:
-				if l.Origin != nil {
-					return l.Origin.SubZone
-				}
-			//return opt.origin.SubZone
-			case OriginServiceOperator:
-				if l.Origin != nil {
-					return l.Origin.Service
-				}
-				//return opt.origin.Service
-			case OriginInstanceIdOperator:
-				if l.Origin != nil {
-					return l.Origin.InstanceId
-				}
-				//return opt.origin.InstanceId
+	case OriginRegionOperator, OriginZoneOperator, OriginSubZoneOperator, OriginServiceOperator, OriginInstanceIdOperator:
+		return originValue(value)
 
-
-		*/
 		// Request
 	case RequestMethodOperator:
 		return l.Method
@@ -196,9 +171,6 @@ func (l *Entry) Value(value string) string {
 	case RequestHostOperator:
 		return l.Host
 	case RequestIdOperator:
-		if l.RequestId != "" {
-			return l.RequestId
-		}
 		return l.Header.Get(RequestIdHeaderName)
 	case RequestFromRouteOperator:
 		return l.Header.Get(FromRouteHeaderName)
