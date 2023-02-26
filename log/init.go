@@ -6,8 +6,6 @@ import (
 	"github.com/idiomatic-go/accessevents/data"
 )
 
-type ReadConfig func() ([]byte, error)
-
 // InitIngressOperators - allows configuration of access log attributes for ingress traffic
 func InitIngressOperators(config []data.Operator) error {
 	var err error
@@ -23,7 +21,7 @@ func InitEgressOperators(config []data.Operator) error {
 }
 
 // CreateEgressOperators - provides creation of egress operators
-func CreateEgressOperators(read ReadConfig) error {
+func CreateEgressOperators(read func() ([]byte, error)) error {
 	if read == nil {
 		return errors.New("invalid argument: ReadConfig function is nil")
 	}
@@ -39,7 +37,7 @@ func CreateEgressOperators(read ReadConfig) error {
 }
 
 // CreateIngressOperators - provides creation of ingress operators from a []byte
-func CreateIngressOperators(read ReadConfig) error {
+func CreateIngressOperators(read func() ([]byte, error)) error {
 	if read == nil {
 		return errors.New("invalid argument: ReadConfig function is nil")
 	}
