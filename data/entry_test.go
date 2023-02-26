@@ -21,9 +21,10 @@ func _Example_Value_Duration() {
 
 }
 
-func Example_Value_Actuator() {
+func Example_Value_Controller() {
 	name := "test-route"
 	op := RouteNameOperator
+	start := time.Now().UTC()
 
 	data := Entry{}
 	fmt.Printf("test: Value(\"%v\") -> [%v]\n", name, data.Value(op))
@@ -31,13 +32,18 @@ func Example_Value_Actuator() {
 	data = Entry{CtrlState: map[string]string{ControllerName: name}}
 	fmt.Printf("test: Value(\"%v\") -> [route_name:%v]\n", name, data.Value(op))
 
+	data1 := NewEntry(IngressTraffic, start, time.Since(start), nil, nil, "", map[string]string{PingName: "true"})
+	fmt.Printf("test: Value(\"%v\") -> [traffic:%v]\n", name, data1.Value(TrafficOperator))
+
 	data = Entry{CtrlState: map[string]string{TimeoutName: "500"}}
 	fmt.Printf("test: Value(\"%v\") -> [timeout:%v]\n", name, data.Value(TimeoutDurationOperator))
 
 	//Output:
 	//test: Value("test-route") -> []
 	//test: Value("test-route") -> [route_name:test-route]
+	//test: Value("test-route") -> [traffic:ping]
 	//test: Value("test-route") -> [timeout:500]
+	
 }
 
 func Example_Value_Request() {

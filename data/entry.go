@@ -10,9 +10,11 @@ import (
 )
 
 const (
-	EgressTraffic      = "egress"
-	IngressTraffic     = "ingress"
-	PingTraffic        = "ping"
+	EgressTraffic  = "egress"
+	IngressTraffic = "ingress"
+	PingTraffic    = "ping"
+
+	PingName           = "ping"
 	TimeoutName        = "timeout"
 	FailoverName       = "failover"
 	RetryName          = "retry"
@@ -56,9 +58,12 @@ func NewEntry(traffic string, start time.Time, duration time.Duration, req *http
 	e.Traffic = traffic
 	e.Start = start
 	e.Duration = duration
-	//e.Origin = &opt.origin
 	if controllerState == nil {
 		controllerState = make(map[string]string, 1)
+	} else {
+		if s, ok := controllerState[PingName]; ok && s == "true" {
+			e.Traffic = PingTraffic
+		}
 	}
 	e.CtrlState = controllerState
 	e.AddRequest(req)
