@@ -1,6 +1,6 @@
 # accessevents
 
-Accessevents provides 3 packages that work with access events, access logging, and access logging middleware implementations.
+Accessevents provides 3 packages that work with access data, access logging, and logging middleware implementations.
 
 ## data 
 
