@@ -14,11 +14,6 @@ type Formatter interface {
 ~~~
 Configurable items, specific to a package, are defined in an options.go file.
 
-## extract
-
-[Extract][extractpkg] provides functionality to initialize and process access log extract.
-
-
 ## log
 
 [Log][logpkg] encompasses access logging functionality. Seperate operators, and runtime initialization of those operators, are provided for ingress and egress traffic. An output template parameter allows redirection of the access logging: 
@@ -40,8 +35,39 @@ func Write[O OutputHandler, F accessdata.Formatter](entry *accessdata.Entry) {
 [Middleware][middlewarepkg] provides implementations of a http.Handler and http.RoundTripper that support ingress and egress logging. Options
 available allow configuring a logging function.
 
+Ingress logging implementation: 
+
+~~~
+// HttpHostMetricsHandler - http handler that captures metrics about an ingress request, also logs an access entry.
+func HttpHostMetricsHandler(appHandler http.Handler, msg string) http.Handler {
+    // implementation details
+}
+~~~
+
+Egress logging implementation:
+
+~~~
+// RoundTrip - implementation of the RoundTrip interface for a transport, also logs an access entry
+func (w *wrapper) RoundTrip(req *http.Request) (*http.Response, error) {
+   // implementation details
+}
+~~~
+
+Configuration of a logging function is supported via an option, which can be used to change the default:
+
+~~~
+// SetLogFn - allows setting an application configured logging function
+func SetLogFn(fn func(e *data.Entry)) {
+// implementation details
+}
+
+var defaultLogFn = func(e *data.Entry) {
+	log.Write[log.LogOutputHandler, data.JsonFormatter](e)
+}
+~~~
+
+
 
 [datapkg]: <https://pkg.go.dev/github.com/idiomatic-go/accessevents/data>
-[extractpkg]: <https://pkg.go.dev/github.com/idiomatic-go/accessevents/extract>
 [logpkg]: <https://pkg.go.dev/github.com/idiomatic-go/accessevents/log>
 [middlewarepkg]: <https://pkg.go.dev/github.com/idiomatic-go/accessevents/middleware>
