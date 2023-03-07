@@ -55,7 +55,7 @@ func Example_Default() {
 
 	if !isEnabled {
 		isEnabled = true
-		WrapDefaultTransport()
+		WrapTransport(nil)
 	}
 	resp, err := http.DefaultClient.Do(req)
 	fmt.Printf("test: RoundTrip(handler:true) -> [status_code:%v] [err:%v]\n", resp.StatusCode, err)

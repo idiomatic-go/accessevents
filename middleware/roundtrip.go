@@ -28,14 +28,24 @@ func (w *wrapper) RoundTrip(req *http.Request) (*http.Response, error) {
 	return resp, nil
 }
 
-func WrapDefaultTransport() {
-	if http.DefaultClient.Transport == nil {
-		http.DefaultClient.Transport = &wrapper{http.DefaultTransport}
+// WrapTransport - provides a RoundTrip wrapper that applies controller controllers
+func WrapTransport(client *http.Client) {
+	if client == nil || client == http.DefaultClient {
+		if http.DefaultClient.Transport == nil {
+			http.DefaultClient.Transport = &wrapper{http.DefaultTransport}
+		} else {
+			http.DefaultClient.Transport = WrapRoundTripper(http.DefaultClient.Transport)
+		}
 	} else {
-		http.DefaultClient.Transport = WrapRoundTripper(http.DefaultClient.Transport)
+		if client.Transport == nil {
+			client.Transport = &wrapper{http.DefaultTransport}
+		} else {
+			client.Transport = WrapRoundTripper(client.Transport)
+		}
 	}
 }
 
+// WrapRoundTripper - wrap a round tripper
 func WrapRoundTripper(rt http.RoundTripper) http.RoundTripper {
 	return &wrapper{rt}
 }
