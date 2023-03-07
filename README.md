@@ -35,6 +35,25 @@ func Write[O OutputHandler, F accessdata.Formatter](entry *accessdata.Entry) {
 [Middleware][middlewarepkg] provides implementations of a http.Handler and http.RoundTripper that support ingress and egress logging. Options
 available allow configuring a logging function.
 
+Ingress logging implementation: 
+
+~~~
+// HttpHostMetricsHandler - http handler that captures metrics about an ingress request, also logs an access entry.
+func HttpHostMetricsHandler(appHandler http.Handler, msg string) http.Handler {
+    // implementation details
+}
+~~~
+
+Egress logging implementation:
+
+~~~
+// RoundTrip - implementation of the RoundTrip interface for a transport, also logs an access entry
+func (w *wrapper) RoundTrip(req *http.Request) (*http.Response, error) {
+   // implementation details
+}
+~~~
+
+
 
 [datapkg]: <https://pkg.go.dev/github.com/idiomatic-go/accessevents/data>
 [logpkg]: <https://pkg.go.dev/github.com/idiomatic-go/accessevents/log>
