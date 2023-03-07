@@ -53,6 +53,19 @@ func (w *wrapper) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 ~~~
 
+Configuration of a logging function is supported via an option, which can be used to change the default:
+
+~~~
+// SetLogFn - allows setting an application configured logging function
+func SetLogFn(fn func(e *data.Entry)) {
+// implementation details
+}
+
+var defaultLogFn = func(e *data.Entry) {
+	log.Write[log.LogOutputHandler, data.JsonFormatter](e)
+}
+~~~
+
 
 
 [datapkg]: <https://pkg.go.dev/github.com/idiomatic-go/accessevents/data>
