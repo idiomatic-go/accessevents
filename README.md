@@ -14,11 +14,6 @@ type Formatter interface {
 ~~~
 Configurable items, specific to a package, are defined in an options.go file.
 
-## extract
-
-[Extract][extractpkg] provides functionality to initialize and process access log extract.
-
-
 ## log
 
 [Log][logpkg] encompasses access logging functionality. Seperate operators, and runtime initialization of those operators, are provided for ingress and egress traffic. An output template parameter allows redirection of the access logging: 
@@ -42,6 +37,5 @@ available allow configuring a logging function.
 
 
 [datapkg]: <https://pkg.go.dev/github.com/idiomatic-go/accessevents/data>
-[extractpkg]: <https://pkg.go.dev/github.com/idiomatic-go/accessevents/extract>
 [logpkg]: <https://pkg.go.dev/github.com/idiomatic-go/accessevents/log>
 [middlewarepkg]: <https://pkg.go.dev/github.com/idiomatic-go/accessevents/middleware>
